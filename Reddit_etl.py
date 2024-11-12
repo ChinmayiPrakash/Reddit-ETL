@@ -4,10 +4,10 @@ import pandas as pd
 from textblob import TextBlob
 
 def reddit_Extraction():
-    CLIENT_ID = '2v7MESwQm_3Xu1hkYygkSQ'
-    SECRET_KEY=	'a5dMZ27skiv8qd0aclw0HAuovHnBFA'
-    USERNAME =  'Chinmayi_Prakash'
-    PASSWORD = 'Chinthan031*'
+    CLIENT_ID = 'xxxxxxxxxx'
+    SECRET_KEY=	'xxxxxxxxxxxx'
+    USERNAME =  'xxxxxxxxxxx'
+    PASSWORD = 'xxxxxxxxxxxxxxxx'
     #Authentication Instance
     auth = requests.auth.HTTPBasicAuth(CLIENT_ID,SECRET_KEY)
     #creating a dictionary containing authentication details
