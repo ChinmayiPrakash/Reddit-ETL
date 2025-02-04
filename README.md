@@ -127,66 +127,6 @@ This Python script will handle the extraction of data from Reddit, transform it 
     
     `nano Reddit_etl.py` 
     
-    -   Copy and paste the following code into the file:
-    
-    python
-    
-    
-    
-    `import requests
-    import requests.auth
-    import pandas as pd
-    from textblob import TextBlob
-    
-    def reddit_Extraction():
-        CLIENT_ID = '2v7MESwQm_3Xu1hkYygkSQ'
-        SECRET_KEY = 'a5dMZ27skiv8qd0aclw0HAuovHnBFA'
-        USERNAME =  'Chinmayi_Prakash'
-        PASSWORD = 'Chinthan031*'
-    
-        # Authentication
-        auth = requests.auth.HTTPBasicAuth(CLIENT_ID, SECRET_KEY)
-        data = {
-            'grant_type': 'password',
-            'username': USERNAME,
-            'password': PASSWORD
-        }
-        headers = {'User-Agent': 'MyAPI/0.0.1'}
-    
-        url = 'https://www.reddit.com/api/v1/access_token'
-        res = requests.post(url, auth=auth, data=data, headers=headers)
-        TOKEN = res.json()['access_token']
-    
-        headers['Authorization'] = f'bearer {TOKEN}'
-    
-        # Fetch posts
-        request_url = 'https://oauth.reddit.com/r/Ask_Politics/hot'
-        res = requests.get(request_url, headers=headers)
-    
-        posts = []
-        for post in res.json()['data']['children']:
-            selftext = post['data']['selftext']
-            sentiment = TextBlob(selftext).sentiment.polarity
-            sentiment_label = 'positive' if sentiment > 0 else 'negative' if sentiment < 0 else 'neutral'
-            
-            posts.append({
-                'subreddit': post['data']['subreddit'],
-                'title': post['data']['title'],
-                'sentiment': sentiment_label,
-                'upvote_ratio': post['data']['upvote_ratio'],
-                'ups': post['data']['ups'],
-                'downs': post['data']['downs'],
-                'score': post['data']['score']
-            })
-        
-        df = pd.DataFrame(posts)
-        
-        # Upload CSV to S3
-        df.to_csv('s3://reddit-etl-chinmayi/reddit.csv', index=False)
-        print(df)` 
-    
-    -   Save and exit the editor (press `CTRL + X`, then `Y`, and `Enter`).
-
 ### Step 3: Create Airflow DAG (Reddit_dag.py)
 
 This script sets up an Apache Airflow DAG (Directed Acyclic Graph) to automate the execution of the Reddit ETL process.
@@ -201,47 +141,7 @@ This script sets up an Apache Airflow DAG (Directed Acyclic Graph) to automate t
     
     `nano Reddit_dag.py` 
     
-    -   Copy and paste the following code into the file:
-    
-    python
-    
-    
-    
-    `from datetime import timedelta
-    from airflow import DAG
-    from airflow.operators.python_operator import PythonOperator
-    from airflow.utils.dates import days_ago
-    from datetime import datetime
-    from Reddit_etl import reddit_Extraction
-    
-    default_args = {
-        'owner': 'Chinmayi',
-        'depends_on_past': False,
-        'start_date': datetime(2020, 11, 8),
-        'email': ['chinmayiprakashmurthy@gmail.com'],
-        'email_on_failure': False,
-        'email_on_retry': False,
-        'retries': 1,
-        'retry_delay': timedelta(minutes=1)
-    }
-    
-    dag = DAG(
-        'Reddit_dag',
-        default_args=default_args,
-        description='US Elections emotions dag',
-        schedule_interval=timedelta(days=1),
-    )
-    
-    run_etl = PythonOperator(
-        task_id='Reddit_ETL',
-        python_callable=reddit_Extraction,
-        dag=dag, 
-    )
-    
-    run_etl` 
-    
-    -   Save and exit the editor (press `CTRL + X`, then `Y`, and `Enter`).
-
+  
 ## 5. Connect EC2 and S3
 
 Your S3 bucket is already configured to receive data from your EC2 instance via the IAM role you created. When you run the ETL pipeline, the processed CSV will be automatically uploaded to S3, ensuring seamless data storage and access.
@@ -273,20 +173,7 @@ Your S3 bucket is already configured to receive data from your EC2 instance via 
 ### Step 3: Create Airflow User with Password
 
 1.  **Create a User with Authentication**: Use the following command to create a new user with a password for accessing the Airflow web interface:
-    
-    
-    
-    
-    
-    `airflow users create \
-        --username admin \
-        --firstname Admin \
-        --lastname User \
-        --role Admin \
-        --email admin@example.com \
-        --password your_password_here` 
-    
-    -   Replace `your_password_here` with a secure password of your choice.
+
 
 ### Step 4: Run Airflow on EC2
 
@@ -323,8 +210,4 @@ Your S3 bucket is already configured to receive data from your EC2 instance via 
 
 -   Once the DAG is triggered, you can monitor the status of each task within the Airflow UI. The execution logs will provide insights into the success or failure of each step.
 
-## Conclusion
 
-You have now set up a complete ETL pipeline that extracts data from the Reddit API, performs sentiment analysis, and uploads the results to AWS S3. This pipeline can be scheduled to run daily, providing continuous updates on sentiment related to US elections.
-
-By following this guide, you have gained experience in setting up an EC2 instance, configuring IAM roles, and utilizing Airflow for orchestrating ETL processes. Feel free to modify the pipeline as needed to suit your specific data analysis requirements or to enhance its functionality.
