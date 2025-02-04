@@ -1,5 +1,5 @@
 
-# Comprehensive Guide to Building a Reddit ETL Pipeline for US Elections Sentiment Analysis
+# Reddit ETL Pipeline for US Elections Sentiment Analysis
 
 This guide will walk you through the complete process of creating an ETL (Extract, Transform, Load) pipeline that extracts data from the Reddit API, performs sentiment analysis using TextBlob, and uploads the processed data to AWS S3. We will set everything up on an AWS EC2 instance, ensuring all steps are clear and thorough.
 
